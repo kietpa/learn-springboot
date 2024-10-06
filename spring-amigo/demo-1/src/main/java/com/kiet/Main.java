@@ -1,5 +1,6 @@
 package com.kiet;
 
+import com.github.javafaker.Faker;
 import com.kiet.customer.Customer;
 import com.kiet.customer.CustomerRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 @SpringBootApplication
 public class Main {
@@ -21,13 +23,15 @@ public class Main {
     @Bean
     CommandLineRunner runner(CustomerRepository customerRepository) {
         return args -> {
-            Customer alex = new Customer("Alex", "alex@gmail.com", 22);
+            Faker faker = new Faker();
+            Random rand = new Random();
 
-            Customer jim = new Customer("Jim", "jim@gmail.com", 23);
+            String firstName = faker.name().firstName();
+            String lastName = faker.name().lastName();
 
-            List<Customer> customers = List.of(alex, jim);
+            Customer customer1 = new Customer(firstName + " " + lastName, firstName + "." + lastName + "@gmail.com", rand.nextInt(18,50));
 
-            customerRepository.saveAll(customers);
+            customerRepository.save(customer1);
         };
     }
 }

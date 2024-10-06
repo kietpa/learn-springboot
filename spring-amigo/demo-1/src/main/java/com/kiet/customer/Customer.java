@@ -5,16 +5,24 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
+@Table(
+        name = "customer",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "customer_email_unique", // added because JPA unique constraint on email is different
+                        columnNames = "email")          // from postgres manual/jdbc unique constraint
+        }
+)
 public class Customer {
-
     @Id
     @SequenceGenerator(
-            name = "customer_id_sequence",
-            sequenceName = "customer_id_sequence"
+            name = "customer_id_seq",
+            sequenceName = "customer_id_seq",
+            allocationSize = 1 // need to specify increment size here for JPA validate
     )
     @GeneratedValue(
             strategy = GenerationType.SEQUENCE,
-            generator = "customer_id_sequence"
+            generator = "customer_id_seq"
     )
     private Integer id;
     @Column(nullable = false)
