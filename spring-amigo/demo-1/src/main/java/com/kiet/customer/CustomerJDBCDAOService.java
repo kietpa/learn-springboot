@@ -4,6 +4,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Types;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,9 +12,11 @@ import java.util.Optional;
 public class CustomerJDBCDAOService implements CustomerDAO{
 
     private final JdbcTemplate jdbcTemplate; // jdbc's version of JPA's repository
+    private final CustomerRowMapper customerRowMapper;
 
-    public CustomerJDBCDAOService(JdbcTemplate jdbcTemplate) {
+    public CustomerJDBCDAOService(JdbcTemplate jdbcTemplate, CustomerRowMapper customerRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.customerRowMapper = customerRowMapper;
     }
 
     @Override
@@ -23,25 +26,20 @@ public class CustomerJDBCDAOService implements CustomerDAO{
                     from customer
                 """;
 
-        // map to object ofc
-        // rs = result set object that maintains a cursor
-        //      pointing to its current row of data
-        RowMapper<Customer> customerRowMapper = (rs, rowNum) -> {
-            return new Customer(
-                    rs.getInt("id"),
-                    rs.getString("name"),
-                    rs.getString("email"),
-                    rs.getInt("age")
-            );
-        };
-        List<Customer> res = jdbcTemplate.query(sql, customerRowMapper);
-
-        return res;
+        return jdbcTemplate.query(sql, customerRowMapper);
     }
 
     @Override
     public Optional<Customer> getById(Integer id) {
-        return Optional.empty();
+        var sql = """
+                    select id, name, email, age
+                    from customer
+                    where id = ?
+                """;
+
+        return jdbcTemplate.query(sql, customerRowMapper, id)
+                .stream()
+                .findFirst();
     }
 
     @Override
@@ -64,21 +62,58 @@ public class CustomerJDBCDAOService implements CustomerDAO{
 
     @Override
     public boolean existsPersonWithEmail(String email) {
-        return false;
+        var sql = """
+                    SELECT COUNT(*) from customer
+                    where email = ?
+                """;
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, email);
+
+        return count > 0 && count != null;
     }
 
     @Override
     public boolean existsPersonWithId(Integer id) {
-        return false;
+        var sql = """
+                    select count(*)
+                    from customer
+                    where id = ?
+                """;
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, id);
+
+        return count > 0 && count != null;
     }
 
     @Override
     public void deleteCustomerById(Integer id) {
+        var sql = """
+                    delete from customer
+                    where id = ?
+                """;
 
+        int res = jdbcTemplate.update(sql, id);
+        System.out.println("deleted " + res + " rows");
     }
 
     @Override
-    public void updateCustomer(Customer customer) {
+    public void updateCustomer(Customer update) {
+        if (update.getName() != null) {
+            var sql = "UPDATE customer set name = ? where id = ?";
+            int res = jdbcTemplate.update(sql, update.getName(), update.getId());
+            System.out.println("updated name");
+        }
 
+        if (update.getEmail() != null) {
+            var sql = "UPDATE customer set email = ? where id = ?";
+            int res = jdbcTemplate.update(sql, update.getEmail(), update.getId());
+            System.out.println("updated email");
+        }
+
+        if (update.getAge() != null) {
+            var sql = "UPDATE customer set age = ? where id = ?";
+            int res = jdbcTemplate.update(sql, update.getAge(), update.getId());
+            System.out.println("updated age");
+        }
     }
 }

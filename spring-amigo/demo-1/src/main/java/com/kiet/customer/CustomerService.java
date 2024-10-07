@@ -6,6 +6,7 @@ import com.kiet.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +19,10 @@ public class CustomerService {
     }
 
     public List<Customer> getAllCustomers() {
-        return customerDAO.getAllCustomers();
+        return customerDAO.getAllCustomers()
+                .stream()
+                .sorted(Comparator.comparing(Customer::getId))
+                .toList();
     }
 
     public Customer getById(Integer id) {
@@ -63,11 +67,11 @@ public class CustomerService {
         boolean changes = false;
 
         // update
-        if (!customerUpdateRequest.name().isEmpty() && !customerUpdateRequest.name().equals(customer.getName())) {
+        if (customerUpdateRequest.name() != null && !customerUpdateRequest.name().equals(customer.getName())) {
             customer.setName(customerUpdateRequest.name());
             changes = true;
         }
-        if (!customerUpdateRequest.email().isEmpty() && !customerUpdateRequest.email().equals(customer.getEmail())) {
+        if (customerUpdateRequest.email() != null && !customerUpdateRequest.email().equals(customer.getEmail())) {
             if (customerDAO.existsPersonWithEmail(customerUpdateRequest.email())) {
                 throw new DuplicateResourceException(
                         "email already taken"
