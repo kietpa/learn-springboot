@@ -1,20 +1,18 @@
 package com.kiet.customer;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
-import java.sql.Types;
 import java.util.List;
 import java.util.Optional;
 
 @Repository("jdbc")
-public class CustomerJDBCDAOService implements CustomerDAO{
+public class CustomerJDBCDataAccessService implements CustomerDAO{
 
     private final JdbcTemplate jdbcTemplate; // jdbc's version of JPA's repository
     private final CustomerRowMapper customerRowMapper;
 
-    public CustomerJDBCDAOService(JdbcTemplate jdbcTemplate, CustomerRowMapper customerRowMapper) {
+    public CustomerJDBCDataAccessService(JdbcTemplate jdbcTemplate, CustomerRowMapper customerRowMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.customerRowMapper = customerRowMapper;
     }
