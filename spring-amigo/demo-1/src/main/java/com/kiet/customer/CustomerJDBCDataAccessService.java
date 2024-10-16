@@ -9,7 +9,7 @@ import java.util.Optional;
 @Repository("jdbc")
 public class CustomerJDBCDataAccessService implements CustomerDAO{
 
-    private final JdbcTemplate jdbcTemplate; // jdbc's version of JPA's repository
+    private final JdbcTemplate jdbcTemplate;
     private final CustomerRowMapper customerRowMapper;
 
     public CustomerJDBCDataAccessService(JdbcTemplate jdbcTemplate, CustomerRowMapper customerRowMapper) {
