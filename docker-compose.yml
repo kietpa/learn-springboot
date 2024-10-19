@@ -1,14 +1,15 @@
-
 version: '3'
 
+# configuring this took 3 hours lol
 services:
   db:
     container_name: postgres
     image: postgres
     environment:
-      POSTGRES_USER: amigo
+      POSTGRES_DB: customer # creates DB with this name at init
+      POSTGRES_USER: amigo # superuser (needs to match application.properties)
       POSTGRES_PASSWORD: password
-      PGDATA: /data/postgres
+      PGDATA: /data/customer
     volumes:
       - db:/data/postgres
     ports:
@@ -16,6 +17,21 @@ services:
     networks:
       - db
     restart: unless-stopped
+  demo-api:
+    container_name: demo-api
+    image: kipas/springdemo
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/customer # so that containerized app can connect to db service above
+    ports:
+      - "8088:8080" # host connects at 8088
+    networks:
+      - db
+    depends_on:
+      - db
+    restart: unless-stopped # flaw: app will keep restarting until postgres DB setup is finished (<10s) and then flyway will execute
+    # alternative to env
+    #command:
+    #  - --spring.datasource.url=jdbc:postgresql://db:5432/customer
 
 networks:
     db:
@@ -23,3 +39,4 @@ networks:
 
 volumes:
     db:
+      driver: local
