@@ -1,5 +1,3 @@
-version: '3'
-
 # configuring this took 3 hours lol
 services:
   db:
@@ -23,7 +21,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/customer # so that containerized app can connect to db service above
     ports:
-      - "8088:8080" # host connects at 8088
+      - "8088:8080" # host/endpoint connects at 8088, app connects at 8080
     networks:
       - db
     depends_on:
